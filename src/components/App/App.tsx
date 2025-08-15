@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, useCallback  } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 import { fetchNotes, FetchNotesResponse } from '../../services/noteService';
@@ -17,23 +17,29 @@ export default function App() {
 
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
+
   const { data, isLoading, isError } = useQuery<FetchNotesResponse, Error>({
     queryKey: ['notes', page, debouncedSearch],
     queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearch }),
   });
 
-  const handleNoteCreated = () => {
+  const handleNoteCreated = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['notes'] });
-  };
+    setIsModalOpen(false);
+  }, [queryClient]);
 
-  const handleNoteDeleted = () => {
+  const handleNoteDeleted = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['notes'] });
-  };
+  }, [queryClient]);
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
         <SearchBox value={search} onChange={setSearch} />
+
         {data?.totalPages && data.totalPages > 1 && (
           <Pagination
             currentPage={page}
@@ -49,7 +55,7 @@ export default function App() {
       {isLoading && <p>Loading notes...</p>}
       {isError && <p>Error loading notes</p>}
 
-      {data && data.data && data.data.length > 0 && (
+      {data?.data && data.data.length > 0 && (
         <NoteList notes={data.data} onNoteDeleted={handleNoteDeleted} />
       )}
 
