@@ -8,7 +8,8 @@ interface NoteListProps {
 }
 
 export default function NoteList({ notes, onNoteDeleted }: NoteListProps) {
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id?: string) => {
+    if (!id) return;
     try {
       await deleteNote(id);
       onNoteDeleted();
@@ -20,7 +21,7 @@ export default function NoteList({ notes, onNoteDeleted }: NoteListProps) {
   return (
     <ul className={css.list}>
       {notes.map(note => (
-        <li key={note._id} className={css.listItem}>
+        <li key={note._id || note.id} className={css.listItem}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
           <div className={css.footer}>
@@ -28,7 +29,7 @@ export default function NoteList({ notes, onNoteDeleted }: NoteListProps) {
             
             <button
               className={css.button}
-              onClick={() => handleDelete(note._id)}
+              onClick={() => handleDelete(note._id || note.id)}
             >
               Delete
             </button>

@@ -26,14 +26,21 @@ export default function App() {
     queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearch }),
   });
 
-  const handleNoteCreated = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['notes'] });
-    setIsModalOpen(false);
-  }, [queryClient]);
+ const handleNoteCreated = useCallback(() => {
+  queryClient.invalidateQueries({
+    queryKey: ['notes'],
+    exact: false, 
+  });
+  setIsModalOpen(false);
+}, [queryClient]);
 
-  const handleNoteDeleted = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['notes'] });
-  }, [queryClient]);
+const handleNoteDeleted = useCallback(() => {
+  queryClient.invalidateQueries({
+    queryKey: ['notes'],
+    exact: false,
+  });
+}, [queryClient]);
+  
 
   return (
     <div className={css.app}>
@@ -55,8 +62,8 @@ export default function App() {
       {isLoading && <p>Loading notes...</p>}
       {isError && <p>Error loading notes</p>}
 
-      {data?.data && data.data.length > 0 && (
-        <NoteList notes={data.data} onNoteDeleted={handleNoteDeleted} />
+      {data && data.notes && data.notes.length > 0 && (
+        <NoteList notes={data.notes} onNoteDeleted={handleNoteDeleted} />
       )}
 
       {isModalOpen && (
