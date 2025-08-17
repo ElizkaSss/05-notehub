@@ -1,27 +1,27 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteNote } from '../../services/noteService';
 import { Note } from '../../types/note';
 import css from './NoteList.module.css';
 
 interface NoteListProps {
   notes: Note[];
-  onNoteDeleted: () => void;
 }
 
-export default function NoteList({ notes, onNoteDeleted }: NoteListProps) {
-  const handleDelete = async (id?: string) => {
-    if (!id) return;
-    try {
-      await deleteNote(id);
-      onNoteDeleted();
-    } catch {
-      alert('Failed to delete note');
-    }
-  };
+export default function NoteList({ notes }: NoteListProps) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: deleteNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+    },
+    onError: () => alert('Failed to delete note'),
+  });
 
   return (
     <ul className={css.list}>
       {notes.map(note => (
-        <li key={note._id || note.id} className={css.listItem}>
+        <li key={note.id} className={css.listItem}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
           <div className={css.footer}>
@@ -29,7 +29,7 @@ export default function NoteList({ notes, onNoteDeleted }: NoteListProps) {
             
             <button
               className={css.button}
-              onClick={() => handleDelete(note._id || note.id)}
+              onClick={() => mutation.mutate(note.id)}
             >
               Delete
             </button>

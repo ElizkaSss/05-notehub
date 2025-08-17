@@ -12,6 +12,13 @@ export interface FetchNotesParams {
   search?: string;
 }
 
+// Тип для створення нотатки
+export interface CreateNoteDto {
+  title: string;
+  content: string;
+  tag: 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
+}
+
 const API_URL = 'https://notehub-public.goit.study/api/notes';
 
 const axiosInstance = axios.create({
@@ -21,22 +28,27 @@ const axiosInstance = axios.create({
   },
 });
 
+// Отримання нотаток
 export const fetchNotes = async ({
   page = 1,
   perPage = 12,
   search = '',
 }: FetchNotesParams): Promise<FetchNotesResponse> => {
-  const response = await axiosInstance.get('', { params: { page, perPage, search } });
+  const response = await axiosInstance.get<FetchNotesResponse>('', {
+    params: { page, perPage, search }
+  });
   return response.data;
 };
 
-export const createNote = async (note: Omit<Note, '_id'>): Promise<Note> => {
-  const response = await axiosInstance.post('', note);
+// Створення нотатки
+export const createNote = async (note: CreateNoteDto): Promise<Note> => {
+  const response = await axiosInstance.post<Note>('', note);
   return response.data;
 };
 
-export const deleteNote = async (id: string): Promise<{ _id: string }> => {
-  const response = await axiosInstance.delete(`/${id}`);
+// Видалення нотатки
+export const deleteNote = async (id: string): Promise<Note> => {
+  const response = await axiosInstance.delete<Note>(`/${id}`);
   return response.data;
 };
 
